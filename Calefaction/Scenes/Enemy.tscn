@@ -1,0 +1,97 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Scripts/Enemy.gd" type="Script" id=1]
+[ext_resource path="res://Textures/Characters/Enemy.png" type="Texture" id=2]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+uniform vec4 white = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 cold = vec4(0.2, 0.6, 0.8, 1.0);
+uniform vec4 hot = vec4(1.0, 0.5, 0.5, 1.0);
+uniform float temperature = 0.0;
+uniform float radius = 0.005;
+
+bool grayscale(vec4 color) {
+	return abs(color.r - color.g) < 0.01 && abs(color.g - color.b) < 0.01;
+}
+
+vec4 colorForTemp(float temp) {
+	if(temperature <= 0.50) {
+		return mix(cold, white, temperature * 2.0);
+	}
+	else {
+		return mix(white, hot, temperature * 2.0 - 1.0);
+	}
+}
+
+void fragment() {
+	vec4 tex = texture(TEXTURE, UV);
+	vec4 colorForTemp = colorForTemp(temperature);
+	float graySum = 0.0;
+	float grayCount = 0.0;
+	for(float ix = -2.0; ix < 3.0; ix += 1.0) {
+		for(float iy = -2.0; iy < 3.0; iy += 1.0) {
+			if(ix == 0.0 && iy == 0.0) continue;
+			vec4 samp = texture(TEXTURE, UV + vec2(ix, iy) * radius);
+			if(grayscale(samp)) {
+				graySum += samp.r;
+				grayCount += 1.0;
+			}
+		}
+	}
+	if(grayscale(tex) && tex.a > 0.0) {
+		float brightness = tex.r;
+		tex = mix(tex, colorForTemp, (1.0 - brightness) * abs(temperature - 0.5) * 6.0); //TODO: Optimize by making color a uniform
+	} else if(tex.a > 0.0) {
+		tex = mix(tex, colorForTemp / 2.0, 0.2);
+		tex = mix(tex, colorForTemp, graySum * abs(temperature - 0.5) * 0.3);
+	}
+	COLOR = tex;
+}"
+_sections_unfolded = [ "Resource" ]
+
+[sub_resource type="ShaderMaterial" id=2]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/white = null
+shader_param/cold = null
+shader_param/hot = null
+shader_param/temperature = null
+shader_param/radius = null
+
+[sub_resource type="CircleShape2D" id=3]
+
+custom_solver_bias = 0.0
+radius = 9.0
+
+[node name="Enemy" type="KinematicBody2D" index="0"]
+
+input_pickable = false
+collision_layer = 1
+collision_mask = 1
+collision/safe_margin = 0.08
+script = ExtResource( 1 )
+
+[node name="Texture" type="Sprite" parent="." index="0"]
+
+material = SubResource( 2 )
+texture = ExtResource( 2 )
+_sections_unfolded = [ "Material" ]
+
+[node name="Shape" type="CollisionShape2D" parent="." index="1"]
+
+rotation = 0.785398
+shape = SubResource( 3 )
+_sections_unfolded = [ "Transform" ]
+
+[node name="LineOfSight" type="RayCast2D" parent="." index="2"]
+
+enabled = true
+exclude_parent = true
+cast_to = Vector2( 0, 50 )
+collision_mask = 1
+
+

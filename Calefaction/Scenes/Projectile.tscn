@@ -1,0 +1,181 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Scripts/Projectile.gd" type="Script" id=1]
+[ext_resource path="res://Textures/Effects/EnemyProjectile.png" type="Texture" id=2]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+render_mode blend_add;
+
+uniform vec4 white = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 cold = vec4(0.2, 0.6, 0.8, 1.0);
+uniform vec4 hot = vec4(1.0, 0.5, 0.5, 1.0);
+uniform float temperature = 0.0;
+uniform float radius = 0.005;
+
+bool grayscale(vec4 color) {
+	return abs(color.r - color.g) < 0.01 && abs(color.g - color.b) < 0.01;
+}
+
+vec4 colorForTemp(float temp) {
+	if(temperature <= 0.50) {
+		return mix(cold, white, temperature * 2.0);
+	}
+	else {
+		return mix(white, hot, temperature * 2.0 - 1.0);
+	}
+}
+
+void fragment() {
+	vec4 tex = texture(TEXTURE, UV);
+	vec4 colorForTemp = colorForTemp(temperature);
+	float graySum = 0.0;
+	float grayCount = 0.0;
+	for(float ix = -2.0; ix < 3.0; ix += 1.0) {
+		for(float iy = -2.0; iy < 3.0; iy += 1.0) {
+			if(ix == 0.0 && iy == 0.0) continue;
+			vec4 samp = texture(TEXTURE, UV + vec2(ix, iy) * radius);
+			if(grayscale(samp)) {
+				graySum += samp.r;
+				grayCount += 1.0;
+			}
+		}
+	}
+	if(grayscale(tex) && tex.a > 0.0) {
+		float brightness = tex.r;
+		tex = mix(tex, colorForTemp, (1.0 - brightness) * abs(temperature - 0.5) * 2.0); //TODO: Optimize by making color a uniform
+	} else if(tex.a > 0.0) {
+		tex = mix(tex, colorForTemp / 2.0, 0.2);
+		tex = mix(tex, colorForTemp, graySum * abs(temperature - 0.5) * 0.3);
+	}
+	COLOR = tex;
+	if(COLOR.a > 0.0) {
+		COLOR.a = 0.2;
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/white = null
+shader_param/cold = null
+shader_param/hot = null
+shader_param/temperature = null
+shader_param/radius = null
+
+[sub_resource type="Gradient" id=7]
+
+offsets = PoolRealArray( 0, 1 )
+colors = PoolColorArray( 1, 1, 1, 0, 1, 1, 1, 0 )
+
+[sub_resource type="GradientTexture" id=8]
+
+flags = 4
+gradient = SubResource( 7 )
+width = 128
+
+[sub_resource type="Curve" id=5]
+
+min_value = 0.0
+max_value = 1.0
+bake_resolution = 100
+_data = [ Vector2( 0, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.0377566, 0.489258 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=6]
+
+flags = 4
+width = 128
+curve = SubResource( 5 )
+
+[sub_resource type="ParticlesMaterial" id=4]
+
+render_priority = 0
+trail_divisor = 1
+emission_shape = 2
+emission_box_extents = Vector3( 1, 10, 1 )
+flag_align_y = false
+flag_rotate_y = false
+flag_disable_z = true
+spread = 0.0
+flatness = 0.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 0.0
+initial_velocity_random = 0.0
+angular_velocity = 100.0
+angular_velocity_random = 1.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+linear_accel = 0.0
+linear_accel_random = 0.0
+radial_accel = 0.0
+radial_accel_random = 0.0
+tangential_accel = 0.0
+tangential_accel_random = 0.0
+damping = 0.0
+damping_random = 0.0
+angle = 0.0
+angle_random = 0.0
+scale = 1.0
+scale_random = 0.0
+scale_curve = SubResource( 6 )
+color_ramp = SubResource( 8 )
+hue_variation = 0.0
+hue_variation_random = 0.0
+anim_speed = 0.0
+anim_speed_random = 0.0
+anim_offset = 0.0
+anim_offset_random = 0.0
+anim_loop = false
+_sections_unfolded = [ "Angular Velocity", "Color", "Emission Shape", "Flags", "Gravity", "Initial Velocity", "Scale", "Spread" ]
+
+[sub_resource type="RectangleShape2D" id=3]
+
+custom_solver_bias = 0.0
+extents = Vector2( 3, 11 )
+
+[node name="Projectile" type="Area2D" index="0"]
+
+input_pickable = true
+gravity_vec = Vector2( 0, 1 )
+gravity = 98.0
+linear_damp = 0.1
+angular_damp = 1.0
+audio_bus_override = false
+audio_bus_name = "Master"
+script = ExtResource( 1 )
+_sections_unfolded = [ "Angular", "Applied Forces", "Collision", "Linear", "Material", "Pickable" ]
+
+[node name="Texture" type="Particles2D" parent="." index="0"]
+
+material = SubResource( 2 )
+emitting = true
+amount = 300
+lifetime = 0.25
+one_shot = false
+preprocess = 0.0
+speed_scale = 1.0
+explosiveness = 0.0
+randomness = 0.0
+fixed_fps = 0
+fract_delta = true
+visibility_rect = Rect2( -100, -100, 200, 200 )
+local_coords = false
+draw_order = 0
+process_material = SubResource( 4 )
+texture = ExtResource( 2 )
+normal_map = null
+h_frames = 1
+v_frames = 1
+_sections_unfolded = [ "Drawing", "Material", "Process Material", "Textures", "Time", "Transform" ]
+
+[node name="Shape" type="CollisionShape2D" parent="." index="1"]
+
+scale = Vector2( 1, 1 )
+shape = SubResource( 3 )
+_sections_unfolded = [ "Transform" ]
+
+[connection signal="body_entered" from="." to="." method="_on_collision"]
+
+

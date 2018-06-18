@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/SmoothTrack.wav-599d5e0d6bb23705bb811e2c47938b50.sample"
+
+[deps]
+
+source_file="res://Audio/SmoothTrack.wav"
+dest_files=[ "res://.import/SmoothTrack.wav-599d5e0d6bb23705bb811e2c47938b50.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=false
+compress/mode=0

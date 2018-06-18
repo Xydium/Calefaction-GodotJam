@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/MenuTrack.wav-906cad68b39962e572c29e1d6627a759.sample"
+
+[deps]
+
+source_file="res://Audio/MenuTrack.wav"
+dest_files=[ "res://.import/MenuTrack.wav-906cad68b39962e572c29e1d6627a759.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=true
+edit/loop=true
+compress/mode=0
