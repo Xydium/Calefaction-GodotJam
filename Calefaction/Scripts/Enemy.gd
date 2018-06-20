@@ -18,6 +18,7 @@ var launch_effect
 var speed = 0.0
 var cooldown = 0.0
 var can_track = 0.0
+var velocity = Vector2(0, 0)
 
 func _process(delta):
 	if player == null:
@@ -44,13 +45,15 @@ func _process(delta):
 			projectiles.add_child(proj)
 	if $LineOfSight.get_collision_point().distance_to(player.position) < 20.0:
 		can_track = SIGHTLESS_TRACK_TIME
-	elif d < tracking_range.value() && can_track > 0:
-		speed = lerp(speed, movement_speed.value(), ACCEL_RATE)
-	else:
-		speed = lerp(speed, 0, ACCEL_RATE)
+	elif d < tracking_range.value() and d > 60 && can_track > 0:
+		speed = movement_speed.value()
+	if d < 60:
+		speed = -50.0
 	
 	var disp = (player.position - position).normalized() * speed
-	move_and_slide(disp)
+	velocity.x = lerp(velocity.x, disp.x, ACCEL_RATE)
+	velocity.y = lerp(velocity.y, disp.y, ACCEL_RATE)
+	move_and_slide(velocity)
 	
 	rotation += spin_rate.value() * delta
 	
