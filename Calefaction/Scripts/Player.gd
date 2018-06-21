@@ -19,9 +19,23 @@ var time = 0.0
 var damage_taken = 0.0
 var temperature_sum = 0.0
 var dead = false
+var spawn_position
 
 func _ready():
 	configure_camera_limits()
+	spawn_position = position
+
+func reset():
+	position = spawn_position
+	target_speed = SPEED_RANGE.x
+	velocity = Vector2(0, 0)
+	health = 1000
+	last_hit_ms = 0
+	actual_spin_rate = SPIN_RATE
+	time = 0.0
+	damage_taken = 0.0
+	temperature_sum = 0.0
+	dead = false
 
 func _process(delta):
 	if not dead:
@@ -101,7 +115,7 @@ func win():
 	$"/root/World/CanvasLayer/EndScreen/ScoreValue".text = str(int(score() + 10000000))
 
 func score():
-	return (100000 * (exp(-time / 60) + exp(-damage_taken / 100)) * (1 + temperature_sum / time))
+	return (100000 * (exp(-time / 60) + exp(-damage_taken / 100)) * (1 + temperature_sum / (time + 1)))
 
 func take_damage(amount, impulse):
 	$HitEffect.play()

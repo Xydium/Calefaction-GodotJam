@@ -18,7 +18,7 @@ func _process(delta):
 	$ThrottleBar.get_stylebox("fg").bg_color = throttle_bar_colors.interpolate((player.target_speed - 300) / 300.0)
 	
 	$Time.text = "%.1f" % player.time
-	last_damage_taken = lerp(last_damage_taken, player.damage_taken, 0.07)
+	last_damage_taken = lerp(last_damage_taken, player.damage_taken, 0.1)
 	$DamageTaken.text = "%.0f" % last_damage_taken
 	$AverageTemperature.text = "%.1f" % (player.temperature_sum / player.time)
 	last_score = lerp(last_score, player.score(), 0.1)
@@ -26,3 +26,9 @@ func _process(delta):
 	
 	if player.dead and Input.is_action_just_pressed("ui_accept"):
 		$"/root/SceneChanger".change_scene("res://Scenes/Menu.tscn")
+
+func reset():
+	$HealthBar.value = player.health
+	$ThrottleBar.value = player.target_speed
+	last_damage_taken = 0.0
+	last_score = player.score()

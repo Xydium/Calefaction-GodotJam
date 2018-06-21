@@ -1,7 +1,7 @@
 extends "Entity.gd"
 
 const ACCEL_RATE = 0.1
-const SIGHTLESS_TRACK_TIME = 5.0
+const SIGHTLESS_TRACK_TIME = 0.25
 const PROJECTILE = preload("res://Scenes/Projectile.tscn")
 
 onready var spin_rate = TSV.new(PI / 2, 3 * PI, temperature)
@@ -19,6 +19,17 @@ var speed = 0.0
 var cooldown = 0.0
 var can_track = 0.0
 var velocity = Vector2(0, 0)
+var spawn_position
+
+func _ready():
+	spawn_position = position
+
+func reset():
+	position = spawn_position
+	speed = 0.0
+	cooldown = 0.0
+	can_track = 0.0
+	velocity = Vector2(0, 0)
 
 func _process(delta):
 	if player == null:

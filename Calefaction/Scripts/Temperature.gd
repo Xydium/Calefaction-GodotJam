@@ -37,3 +37,7 @@ func scaled(base_val, max_val):
 
 func color_for_temp():
 	return temp_color_ramp.interpolate(temperature / MAX_TEMP)
+
+func reset():
+	temperature = MIN_TEMP
+	lerped_temperature = temperature
